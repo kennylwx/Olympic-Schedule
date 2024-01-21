@@ -1,18 +1,20 @@
-FROM node:21-alpine
+# Use a multi-platform base image
+FROM --platform=linux/amd64,linux/arm64 node:16-alpine
 
-# will initialize a working directory in your new OS
+# Set the working directory inside the container
 WORKDIR /web-apps
 
-# will copy package.json into the working directory that we initialized in previous step.
+# Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# will install all the dependencies of your project.
+# Install project dependencies
 RUN npm install
 
-# will copy all the files from your current directory to the working directory of the container, 
-# You can use .dockerignore if you don't want to copy some files into your docker container.
+# Copy the rest of the application files to the working directory
 COPY . .
 
+# Expose the port the app runs on
 EXPOSE 3000
 
-CMD npm run dev
+# Start the application in development mode
+CMD ["npm", "run", "dev"]

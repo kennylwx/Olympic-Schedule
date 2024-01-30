@@ -1,5 +1,5 @@
 # Use a multi-platform base image
-FROM --platform=linux/amd64,linux/arm64 node:16-alpine
+FROM --platform=linux/amd64 node:21-alpine
 
 # Set the working directory inside the container
 WORKDIR /web-apps

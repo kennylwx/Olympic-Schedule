@@ -1,20 +1,27 @@
 # Use a multi-platform base image
-FROM --platform=linux/amd64 node:21-alpine
+FROM --platform=linux/amd64 node:21-alpine AS build
 
 # Set the working directory inside the container
 WORKDIR /web-apps
 
-# Copy package.json and package-lock.json to the working directory
-COPY package*.json ./
+# ARG is used to declare build arguments
+ARG TST_STR=default_value
 
-# Install project dependencies
-RUN npm install
+# Set environment variable inside the container
+ENV MY_ENV_VAR=$TST_STR
 
-# Copy the rest of the application files to the working directory
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
 COPY . .
+RUN yarn build
 
-# Expose the port the app runs on
-EXPOSE 3000
+# Stage 2 - Use Nginx for serving the app
+FROM --platform=linux/amd64 nginx:latest
+COPY --from=build /web-apps/build /usr/share/nginx/html
+COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Start the application in development mode
-CMD ["npm", "run", "dev"]
+EXPOSE 8080
+
+# Command to start Nginx
+CMD ["nginx", "-g", "daemon off;"]
